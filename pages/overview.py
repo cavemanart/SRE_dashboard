@@ -5,14 +5,21 @@ import numpy as np
 def render_overview():
     st.header("📊 Overview")
 
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Latency p99", "420ms", "+30ms")
-    col2.metric("Error Rate", "0.12%", "-0.02%")
-    col3.metric("Traffic", "1.2k RPS", "+8%")
+    from storage.signals import read_signals
 
-    data = pd.DataFrame({
-        "time": pd.date_range(end=pd.Timestamp.now(), periods=50),
-        "latency": np.random.normal(350, 40, 50)
-    })
+    service = st.session_state.get("service", "payments-service")
+    df = read_signals(service)
 
-    st.line_chart(data.set_index("time"))
+    # Show metrics summary if data exists
+    if not df.empty:
+        col1, col2, col3 = st.columns(3)
+        latest = df.sort_values("timestamp").iloc[-1]
+        col1.metric("Latest Metric Value", latest["value"])
+        col2.metric("Signal Type", latest["signal_type"])
+        col3.metric("Total Signals", len(df))
+
+        st.subheader("Time Series for Selected Service")
+        ts = df.groupby("timestamp")["value"].mean().reset_index()
+        st.line_chart(ts.set_index("timestamp"))
+    else:
+        st.info("No signals available for this service. Add some in the Data Input page.")
