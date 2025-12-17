@@ -4,20 +4,20 @@ def render_sidebar():
     with st.sidebar:
         st.title("🛠 SRE Console")
 
-        st.selectbox(
+        st.session_state.service = st.selectbox(
             "Service",
-            ["payments-service", "auth-service", "search-service"]
+            ["payments-service", "auth-service", "search-service"],
+            key="service_select"
         )
 
-        st.selectbox(
+        st.session_state.environment = st.selectbox(
             "Environment",
-            ["prod", "staging"]
+            ["prod", "staging"],
+            key="env_select"
         )
 
-        st.radio(
+        st.session_state.page = st.radio(
             "Navigate",
-            ["Overview", "Services", "SLOs", "Incidents", "Insights", "Simulator"]
+            ["Overview", "Data Input", "Services", "SLOs", "Incidents", "Insights", "Simulator"],
+            key="page_select"
         )
-
-        st.divider()
-        st.caption("Reliability first.")
