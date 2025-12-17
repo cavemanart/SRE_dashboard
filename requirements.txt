@@ -4,3 +4,4 @@ numpy
 networkx
 pyvis
 scikit-learn
+duckdb
