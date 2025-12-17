@@ -1,19 +1,21 @@
 import streamlit as st
-import pandas as pd
-from ingestion.manual import save_manual_signal
 
 def render_data_input():
     st.header("✍️ Manual Data Input")
 
-    with st.form("manual_signal"):
-        col1, col2 = st.columns(2)
+    try:
+        from ingestion.manual import save_manual_signal
+    except Exception as e:
+        st.error("Failed to load storage layer")
+        st.exception(e)
+        return  # ⬅️ NOT st.stop()
 
-        service = col1.text_input("Service", "payments-service")
-        signal_type = col2.selectbox(
+    with st.form("manual_signal"):
+        service = st.text_input("Service", st.session_state.get("service", "payments-service"))
+        signal_type = st.selectbox(
             "Signal Type",
             ["latency", "traffic", "error", "saturation", "incident"]
         )
-
         name = st.text_input("Metric / Event Name")
         value = st.number_input("Value", step=0.01)
         timestamp = st.date_input("Date")
@@ -21,11 +23,5 @@ def render_data_input():
         submitted = st.form_submit_button("Add Signal")
 
         if submitted:
-            save_manual_signal(
-                service=service,
-                signal_type=signal_type,
-                name=name,
-                value=value,
-                timestamp=timestamp
-            )
-            st.success("Signal added successfully")
+            save_manual_signal(service, signal_type, name, value, timestamp)
+            st.success("Signal added")
